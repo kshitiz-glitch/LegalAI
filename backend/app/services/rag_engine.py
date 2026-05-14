@@ -32,13 +32,20 @@ class RAGEngine:
         self.qdrant = QdrantClient(url=settings.QDRANT_URL, api_key=settings.QDRANT_API_KEY, timeout=30)
         self.bi_encoder = SentenceTransformer("all-MiniLM-L6-v2")
 
-        try:
-            from sentence_transformers import CrossEncoder
-            self.cross_encoder = CrossEncoder("cross-encoder/ms-marco-MiniLM-L-6-v2")
-            logger.info("CrossEncoder loaded successfully.")
-        except Exception as e:
-            logger.warning("CrossEncoder failed to load (%s). Reranking disabled.", e)
+        # CrossEncoder disabled by default to stay under 512MB RAM (Render free tier)
+        # Set ENABLE_RERANKER=true locally if you have enough RAM
+        import os
+        if os.getenv("ENABLE_RERANKER", "false").lower() == "true":
+            try:
+                from sentence_transformers import CrossEncoder
+                self.cross_encoder = CrossEncoder("cross-encoder/ms-marco-MiniLM-L-6-v2")
+                logger.info("CrossEncoder loaded successfully.")
+            except Exception as e:
+                logger.warning("CrossEncoder failed to load (%s). Reranking disabled.", e)
+                self.cross_encoder = None
+        else:
             self.cross_encoder = None
+            logger.info("CrossEncoder skipped (ENABLE_RERANKER not set).")
 
         self._ensure_collection()
         self._load_bm25()
