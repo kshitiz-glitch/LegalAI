@@ -1,0 +1,166 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* ── Design Tokens — Legal Dark Identity ──────────────────────────────────── */
+@layer base {
+  :root {
+    --background: 40 33% 98%;
+    --foreground: 220 25% 12%;
+
+    --card: 0 0% 100%;
+    --card-foreground: 220 25% 12%;
+
+    --popover: 0 0% 100%;
+    --popover-foreground: 220 25% 12%;
+
+    --primary: 172 66% 40%;
+    --primary-foreground: 0 0% 100%;
+
+    --secondary: 40 20% 96%;
+    --secondary-foreground: 220 25% 12%;
+
+    --muted: 40 18% 96%;
+    --muted-foreground: 220 10% 46%;
+
+    --accent: 38 92% 50%;
+    --accent-foreground: 220 25% 12%;
+
+    --destructive: 0 72% 51%;
+    --destructive-foreground: 0 0% 100%;
+
+    --border: 36 16% 88%;
+    --input: 36 16% 88%;
+    --ring: 172 66% 40%;
+
+    --radius: 0.625rem;
+  }
+
+  * {
+    @apply border-border;
+  }
+
+  html {
+    scroll-behavior: smooth;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+  }
+
+  body {
+    @apply bg-background text-foreground font-sans;
+  }
+
+  ::selection {
+    background: hsl(172 66% 40% / 0.15);
+    color: hsl(172 66% 25%);
+  }
+
+  :focus-visible {
+    @apply outline-none ring-2 ring-ring ring-offset-2 ring-offset-background;
+  }
+}
+
+/* ── Utility Classes ──────────────────────────────────────────────────────── */
+@layer utilities {
+  /* Shimmer skeleton */
+  .shimmer {
+    background: linear-gradient(
+      90deg,
+      hsl(var(--muted)) 25%,
+      hsl(var(--border)) 50%,
+      hsl(var(--muted)) 75%
+    );
+    background-size: 200% 100%;
+    animation: shimmer 2s infinite linear;
+  }
+
+  /* Smooth card hover */
+  .hover-lift {
+    @apply transition-all duration-200 ease-out;
+  }
+  .hover-lift:hover {
+    @apply shadow-card-hover;
+    transform: translateY(-2px);
+  }
+
+  /* Gradient text — warm teal to amber */
+  .gradient-text {
+    @apply bg-clip-text text-transparent;
+    background-image: linear-gradient(135deg, hsl(172 66% 35%), hsl(172 66% 50%), hsl(38 92% 50%));
+  }
+
+  /* Signature mesh gradient (brand element) */
+  .mesh-gradient {
+    background:
+      radial-gradient(at 20% 30%, hsl(172 66% 40% / 0.25) 0%, transparent 50%),
+      radial-gradient(at 80% 70%, hsl(38 92% 50% / 0.15) 0%, transparent 50%),
+      radial-gradient(at 50% 50%, hsl(172 50% 30% / 0.1) 0%, transparent 70%);
+  }
+
+  /* Hero background grid */
+  .grid-bg {
+    background-image: linear-gradient(
+        to right,
+        hsl(var(--border) / 0.4) 1px,
+        transparent 1px
+      ),
+      linear-gradient(
+        to bottom,
+        hsl(var(--border) / 0.4) 1px,
+        transparent 1px
+      );
+    background-size: 60px 60px;
+  }
+
+  /* Subtle dot-grid for authenticated pages */
+  .dot-bg {
+    background-image: radial-gradient(
+      circle,
+      hsl(var(--border) / 0.4) 1px,
+      transparent 1px
+    );
+    background-size: 24px 24px;
+  }
+
+  /* Radial fade mask */
+  .radial-fade {
+    mask-image: radial-gradient(
+      ellipse 80% 70% at 50% 50%,
+      black 30%,
+      transparent 100%
+    );
+  }
+
+  /* Hide scrollbar */
+  .no-scrollbar::-webkit-scrollbar {
+    display: none;
+  }
+  .no-scrollbar {
+    -ms-overflow-style: none;
+    scrollbar-width: none;
+  }
+
+  /* Risk gauge colors */
+  .gauge-low    { --gauge-color: #10B981; }
+  .gauge-medium { --gauge-color: #F59E0B; }
+  .gauge-high   { --gauge-color: #EF4444; }
+
+  /* Left-border accent for cards */
+  .card-accent { border-left: 4px solid transparent; }
+  .card-accent-teal    { border-left-color: hsl(172 66% 40%); }
+  .card-accent-red     { border-left-color: #EF4444; }
+  .card-accent-amber   { border-left-color: #F0A500; }
+  .card-accent-emerald { border-left-color: #10B981; }
+  .card-accent-purple  { border-left-color: #8B5CF6; }
+  .card-accent-indigo  { border-left-color: #6366F1; }
+  .card-accent-rose    { border-left-color: #F43F5E; }
+  .card-accent-cyan    { border-left-color: #06B6D4; }
+  .card-accent-blue    { border-left-color: #3B82F6; }
+
+  /* Stagger animation delay */
+  .stagger-1 { animation-delay: 50ms; }
+  .stagger-2 { animation-delay: 100ms; }
+  .stagger-3 { animation-delay: 150ms; }
+  .stagger-4 { animation-delay: 200ms; }
+  .stagger-5 { animation-delay: 250ms; }
+}
