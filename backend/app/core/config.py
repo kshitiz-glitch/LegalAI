@@ -15,7 +15,7 @@ class Settings(BaseSettings):
     QDRANT_API_KEY: str
     QDRANT_COLLECTION: str = "legal_clauses"
 
-    CORS_ORIGINS: List[str] = ["http://localhost:3000"]
+    CORS_ORIGINS: str = "http://localhost:3000"
     BM25_INDEX_PATH: str = "./data/bm25_index.pkl"
 
     class Config:
