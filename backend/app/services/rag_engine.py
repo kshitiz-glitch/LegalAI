@@ -5,14 +5,6 @@ import os
 from typing import List, Dict, Optional
 import uuid
 
-from qdrant_client import QdrantClient
-from qdrant_client.models import (
-    Distance, VectorParams, PointStruct,
-    Filter, FieldCondition, MatchValue,
-)
-from sentence_transformers import SentenceTransformer
-from rank_bm25 import BM25Okapi
-
 from app.core.config import settings
 
 logger = logging.getLogger(__name__)
@@ -32,6 +24,10 @@ class RAGEngine:
     def __init__(self) -> None:
         if self._ready:
             return
+
+        # Lazy imports — keeps app startup lightweight
+        from qdrant_client import QdrantClient
+        from sentence_transformers import SentenceTransformer
 
         self.qdrant = QdrantClient(url=settings.QDRANT_URL, api_key=settings.QDRANT_API_KEY, timeout=30)
         self.bi_encoder = SentenceTransformer("all-MiniLM-L6-v2")
@@ -55,6 +51,7 @@ class RAGEngine:
     def _ensure_collection(self) -> None:
         existing = [c.name for c in self.qdrant.get_collections().collections]
         if settings.QDRANT_COLLECTION not in existing:
+            from qdrant_client.models import Distance, VectorParams
             self.qdrant.create_collection(
                 collection_name=settings.QDRANT_COLLECTION,
                 vectors_config=VectorParams(size=384, distance=Distance.COSINE),
@@ -88,6 +85,7 @@ class RAGEngine:
     # ------------------------------------------------------------------
 
     def index_clauses(self, clauses: List[Dict]) -> int:
+        from qdrant_client.models import PointStruct
         points = []
         for clause in clauses:
             vec = self.bi_encoder.encode(clause["text"], convert_to_numpy=True).tolist()
@@ -107,6 +105,7 @@ class RAGEngine:
         return len(points)
 
     def build_and_save_bm25(self, clauses: List[Dict]) -> None:
+        from rank_bm25 import BM25Okapi
         corpus = [c["text"] for c in clauses]
         tokenized = [doc.lower().split() for doc in corpus]
         index = BM25Okapi(tokenized)
@@ -124,6 +123,7 @@ class RAGEngine:
     # ------------------------------------------------------------------
 
     def _vector_search(self, query: str, k: int, clause_type: Optional[str]) -> List[Dict]:
+        from qdrant_client.models import Filter, FieldCondition, MatchValue
         vec = self.bi_encoder.encode(query, convert_to_numpy=True).tolist()
         filt = None
         if clause_type:
