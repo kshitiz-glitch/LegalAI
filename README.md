@@ -157,7 +157,7 @@ graph TB
 
     subgraph Data["💾 Data Layer"]
         QDRANT[(Qdrant Cloud\n208K vectors)]
-        SQLITE[(SQLite\nUsers & Contracts)]
+        PG[(Neon PostgreSQL\nUsers & Contracts)]
         BM25[BM25 Index\nKeyword Search]
     end
 
@@ -167,7 +167,7 @@ graph TB
     RAG --> QDRANT
     RAG --> BM25
     N3 --> RAG
-    API --> SQLITE
+    API --> PG
 
     style Frontend fill:#0d1117,stroke:#1DB68C,color:#fff
     style Backend fill:#0d1117,stroke:#3b82f6,color:#fff
@@ -254,7 +254,7 @@ stateDiagram-v2
 | **Qdrant Cloud** | Vector database (208K+ vectors) |
 | **Sentence-Transformers** | `all-MiniLM-L6-v2` embeddings |
 | **BM25 (rank-bm25)** | Sparse keyword retrieval |
-| **SQLAlchemy (async)** | SQLite ORM for users & contracts |
+| **SQLAlchemy (async)** | PostgreSQL ORM for users & contracts |
 | **PDFPlumber + PyMuPDF** | Dual-engine PDF text extraction |
 | **bcrypt + python-jose** | JWT auth with password hashing |
 
@@ -362,7 +362,7 @@ Legal AI/
 ### 1. Clone the repository
 
 ```bash
-git clone https://github.com/YOUR_USERNAME/legalai.git
+git clone https://github.com/kshitiz-glitch/LegalAI.git
 cd legalai
 ```
 
@@ -431,6 +431,59 @@ Open [http://localhost:3000](http://localhost:3000) and you're ready to go.
 | `DELETE` | `/api/contracts/{id}` | Delete a contract |
 | `POST` | `/api/search/clauses` | Semantic clause search |
 | `GET` | `/api/search/browse` | Browse clauses by type |
+
+---
+
+## 🌐 Production Deployment
+
+### Live URLs
+
+| Service | URL | Platform |
+|---|---|---|
+| **Frontend** | [legal-ai.vercel.app](https://legal-ftgsgdraz-kshitizs-projects-13290819.vercel.app) | Vercel |
+| **Backend API** | [kshitiz-glitch-legalai.hf.space](https://kshitiz-glitch-legalai.hf.space) | Hugging Face Spaces |
+| **Health Check** | [/health](https://kshitiz-glitch-legalai.hf.space/health) | UptimeRobot monitored |
+
+### Deployment Architecture
+
+```mermaid
+graph LR
+    USER[User] --> VERCEL[Vercel\nNext.js Frontend]
+    VERCEL --> HF[HF Spaces\nFastAPI + Docker]
+    HF --> NEON[(Neon PostgreSQL)]
+    HF --> QDRANT[(Qdrant Cloud\n208K vectors)]
+    HF --> GROQ[Groq API\nLLaMA 3.3 70B]
+    UPTIME[UptimeRobot] -.->|/health every 5m| HF
+
+    style VERCEL fill:#000,stroke:#fff,color:#fff
+    style HF fill:#FFD21E,stroke:#000,color:#000
+    style NEON fill:#3ECF8E,stroke:#000,color:#000
+    style QDRANT fill:#DC382D,stroke:#000,color:#fff
+```
+
+### Deploy Backend (Hugging Face Spaces)
+
+1. Create a **Docker Space** on [huggingface.co/new-space](https://huggingface.co/new-space)
+2. Push the repo (the `Dockerfile` at root handles everything):
+   ```bash
+   git remote add hf https://huggingface.co/spaces/YOUR_USERNAME/legal-ai
+   git push hf main
+   ```
+3. Add **Secrets** in Space Settings:
+   - `DATABASE_URL`, `SECRET_KEY`, `GROQ_API_KEY`, `QDRANT_URL`, `QDRANT_API_KEY`, `CORS_ORIGINS`
+4. The Space builds the Docker image and starts the API on port `7860`
+
+### Deploy Frontend (Vercel)
+
+1. Import your GitHub repo on [vercel.com](https://vercel.com)
+2. Set **Root Directory** → `frontend`
+3. Add environment variable:
+   - `NEXT_PUBLIC_API_URL` = `https://YOUR_USERNAME-legal-ai.hf.space`
+4. Deploy — Vercel auto-builds on every push
+
+### Uptime Monitoring
+
+Set up [UptimeRobot](https://uptimerobot.com) to ping `/health` every 5 minutes to prevent the HF Space from sleeping.
 
 ---
 
